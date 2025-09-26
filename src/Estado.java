@@ -54,6 +54,11 @@ public class Estado {
     public void setCanibales_der(int canibales_der) {
         this.canibales_der = canibales_der;
     }
+    public int heuristica() {
+    // Heurística admisible: misioneros + caníbales en el lado izquierdo
+    return this.misioneros_isq + this.canibales_isq;
+}
+
     // ...existing code...
 @Override
 public boolean equals(Object obj) {

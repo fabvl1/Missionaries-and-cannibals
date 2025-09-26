@@ -3,7 +3,7 @@ public class App {
         Estado inicial = new Estado(3, 3, 0, 0, 0);
         Tree nodo_inicial = new Tree(inicial, null, 0);
 
-        AlgoritmoSolucion solucionador = new AlgoritmoSolucion(nodo_inicial);
+        AlgoritmoSolucion solucionador = new AlgoritmoSolucion(nodo_inicial,1);
 
         if (solucionador.solucionEncontrada()) {
             System.out.println("Solution found:\n");

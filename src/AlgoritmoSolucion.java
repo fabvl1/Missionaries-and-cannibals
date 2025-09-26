@@ -1,56 +1,112 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class AlgoritmoSolucion {
-    // Estructuras para la búsqueda en anchura
+    private final Estado estado_objetivo = new Estado(0, 0, 1, 3, 3);
+    private int algoritmo;  // 1 para BFS, 2 para A*
+
+    // ==================== SECCIÓN BFS ====================
     private Queue<Tree> colaBusqueda = new LinkedList<>();
     private ArrayList<Estado> estadosVisitados = new ArrayList<>();
-    private Tree nodoActual;
-    private final Estado estado_objetivo = new Estado(0, 0, 1, 3, 3);
+    private Tree nodoActualBFS;
+
+    // ==================== SECCIÓN A* ====================
+    private PriorityQueue<Tree> colaPrioridad = new PriorityQueue<>(Comparator.comparingInt(n -> calcularF(n)));
+    private Map<Estado, Integer> gScore = new HashMap<>();
+    private Map<Estado, Tree> vinoDe = new HashMap<>();
+    private Set<Estado> explorados = new HashSet<>();
+    private Tree nodoActualAStar;
 
     /**
-     * Ejecuta el algoritmo de búsqueda en anchura (BFS) para encontrar la solución.
-     * El resultado se puede obtener con obtenerSolucion().
+     * Constructor: Inicializa y ejecuta el algoritmo seleccionado.
      */
-    public AlgoritmoSolucion(Tree nodoInicial) {
-        inicializarBusqueda(nodoInicial);
-        ejecutarBusquedaEnAnchura();
-    }
-
-    /**
-     * Inicializa las estructuras de datos para la búsqueda.
-     */
-    private void inicializarBusqueda(Tree nodoInicial) {
-        colaBusqueda.offer(nodoInicial);
-        estadosVisitados.add(nodoInicial.getEstado());
-        nodoActual = nodoInicial;
-    }
-
-    /**
-     * Ejecuta el ciclo principal de la búsqueda en anchura.
-     */
-    private void ejecutarBusquedaEnAnchura() {
-        while (nodoActual != null && !nodoActual.getEstado().equals(estado_objetivo)) {
-            expandirNodoActual();
-            nodoActual = colaBusqueda.poll();
+    public AlgoritmoSolucion(Tree nodoInicial, int algoritmo) {
+        this.algoritmo = algoritmo;
+        switch (algoritmo) {
+            case 1:
+                inicializarBFS(nodoInicial);
+                ejecutarBFS();
+                break;
+            case 2:
+                inicializarAStar(nodoInicial);
+                ejecutarAStar();
+                break;
+            default:
+                throw new IllegalArgumentException("Algoritmo no soportado: " + algoritmo);
         }
     }
 
-    /**
-     * Expande el nodo actual generando todos sus hijos válidos.
-     */
-    private void expandirNodoActual() {
-        ArrayList<Estado> movimientosValidos = generarMovimientosValidos(nodoActual.getEstado());
+    // ==================== MÉTODOS BFS ====================
+    private void inicializarBFS(Tree nodoInicial) {
+        colaBusqueda.offer(nodoInicial);
+        estadosVisitados.add(nodoInicial.getEstado());
+        nodoActualBFS = nodoInicial;
+    }
+
+    private void ejecutarBFS() {
+        while (nodoActualBFS != null && !nodoActualBFS.getEstado().equals(estado_objetivo)) {
+            expandirNodoBFS();
+            nodoActualBFS = colaBusqueda.poll();
+        }
+    }
+
+    private void expandirNodoBFS() {
+        ArrayList<Estado> movimientosValidos = generarMovimientosValidos(nodoActualBFS.getEstado());
         for (Estado nuevoEstado : movimientosValidos) {
             if (!estadosVisitados.contains(nuevoEstado)) {
-                Tree nuevoNodo = new Tree(nuevoEstado, nodoActual, nodoActual.getProfundidad() + 1);
+                Tree nuevoNodo = new Tree(nuevoEstado, nodoActualBFS, nodoActualBFS.getProfundidad() + 1);
                 colaBusqueda.offer(nuevoNodo);
                 estadosVisitados.add(nuevoEstado);
             }
         }
     }
 
+    // ==================== MÉTODOS A* ====================
+    private void inicializarAStar(Tree nodoInicial) {
+        gScore.put(nodoInicial.getEstado(), 0);
+        colaPrioridad.add(nodoInicial);
+        vinoDe.put(nodoInicial.getEstado(), null);
+        nodoActualAStar = nodoInicial;
+    }
+
+    private void ejecutarAStar() {
+        while (!colaPrioridad.isEmpty() && !nodoActualAStar.getEstado().equals(estado_objetivo)) {
+            nodoActualAStar = colaPrioridad.poll();
+            explorados.add(nodoActualAStar.getEstado());
+            expandirNodoAStar();
+        }
+    }
+
+    private void expandirNodoAStar() {
+        ArrayList<Estado> movimientosValidos = generarMovimientosValidos(nodoActualAStar.getEstado());
+        for (Estado nuevoEstado : movimientosValidos) {
+            if (explorados.contains(nuevoEstado)) continue;
+            
+            int gTentativo = gScore.get(nodoActualAStar.getEstado()) + 1;
+            Tree nuevoNodo = new Tree(nuevoEstado, nodoActualAStar, nodoActualAStar.getProfundidad() + 1);
+            
+            if (!gScore.containsKey(nuevoEstado) || gTentativo < gScore.get(nuevoEstado)) {
+                vinoDe.put(nuevoEstado, nodoActualAStar);
+                gScore.put(nuevoEstado, gTentativo);
+                colaPrioridad.add(nuevoNodo);
+            }
+        }
+    }
+
+    private int calcularF(Tree nodo) {
+        int g = gScore.get(nodo.getEstado());
+        int h = nodo.getEstado().heuristica();
+        return g + h;
+    }
+
+    // ==================== MÉTODOS COMUNES ====================
     /**
      * Genera todos los movimientos válidos posibles desde un estado dado.
      */
@@ -137,22 +193,35 @@ public class AlgoritmoSolucion {
     }
 
     /**
-     * Devuelve la lista de estados desde el inicial al objetivo.
+     * Devuelve la lista de estados desde el inicial al objetivo, basado en el algoritmo.
      */
     public ArrayList<Estado> obtenerSolucion() {
         ArrayList<Estado> caminoSolucion = new ArrayList<>();
-        Tree nodo = nodoActual;
-        while (nodo != null) {
-            caminoSolucion.add(0, nodo.getEstado());
-            nodo = nodo.getPadre();
+        if (algoritmo == 1) {  // BFS
+            Tree nodo = nodoActualBFS;
+            while (nodo != null) {
+                caminoSolucion.add(0, nodo.getEstado());
+                nodo = nodo.getPadre();
+            }
+        } else if (algoritmo == 2) {  // A*
+            Tree nodo = nodoActualAStar;
+            while (nodo != null) {
+                caminoSolucion.add(0, nodo.getEstado());
+                nodo = vinoDe.get(nodo.getEstado());
+            }
         }
         return caminoSolucion;
     }
 
     /**
-     * Indica si se encontró una solución.
+     * Indica si se encontró una solución, basado en el algoritmo.
      */
     public boolean solucionEncontrada() {
-        return nodoActual != null && nodoActual.getEstado().equals(estado_objetivo);
+        if (algoritmo == 1) {
+            return nodoActualBFS != null && nodoActualBFS.getEstado().equals(estado_objetivo);
+        } else if (algoritmo == 2) {
+            return nodoActualAStar != null && nodoActualAStar.getEstado().equals(estado_objetivo);
+        }
+        return false;
     }
 }
