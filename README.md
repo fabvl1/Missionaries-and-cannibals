@@ -1,18 +1,59 @@
-## Getting Started
+Missionaries and Cannibals
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+This repository contains a complete solution to the classic Missionaries and Cannibals problem. It includes both an automatic implementation using breadth-first search (BFS) and an interactive graphical interface to solve the problem manually.
 
-## Folder Structure
+---
 
-The workspace contains two folders by default, where:
+Problem Description
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+Three missionaries and three cannibals must cross a river using a boat that can only carry up to two people at a time. At no point, on either shore, can the cannibals outnumber the missionaries (if there are missionaries present), as this would endanger the missionaries.
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+---
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+Project Structure
 
-## Dependency Management
+· Estado.java: Represents the problem state (number of missionaries and cannibals on each shore and the boat's position).
+· Tree.java: Search tree node, used to reconstruct the solution.
+· AlgoritmoSolucion.java: Implements breadth-first search (BFS) to find the optimal solution.
+· App.java: Runs the automatic solution and prints the steps to the console.
+· InterfazManual.java: Graphical interface (Swing) to solve the problem manually, with animations and interactive controls.
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+---
+
+How to Run
+
+Requirements
+
+· Java 8 or higher
+
+Automatic Execution (Console)
+
+Compile the files:
+
+javac Estado.java Tree.java AlgoritmoSolucion.java App.java
+
+Run the application:
+
+java App
+
+You will see the optimal steps to solve the problem in the console.
+
+---
+
+Manual Execution (Graphical Interface)
+
+Compile the interface file:
+
+javac InterfazManual.java
+
+Run the interface:
+
+java InterfazManual
+
+You can move missionaries and cannibals manually, view the graphical state of the river, the boat, and the characters, and receive hints or undo movements.
+
+---
+
+Credits
+
+Developed for educational purposes and practice in search algorithms and graphical interface development in Java.
