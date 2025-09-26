@@ -17,7 +17,7 @@ import java.util.Stack;
  * Ejecutar:
  *   java InterfazManual
  */
-public class InterfazManual extends JFrame {
+public class MisionarariesCannibalsUI extends JFrame {
     private Estado estadoActual = new Estado(3, 3, 0, 0, 0);
     private int paso = 0;
 
@@ -32,7 +32,7 @@ public class InterfazManual extends JFrame {
     // Para deshacer
     private Stack<Estado> pilaEstados = new Stack<>();
 
-    public InterfazManual() {
+    public MisionarariesCannibalsUI() {
         super("Misioneros y Caníbales — Modo Manual (Mejorado)");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 560);
@@ -490,7 +490,7 @@ public class InterfazManual extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            InterfazManual ui = new InterfazManual();
+            MisionarariesCannibalsUI ui = new MisionarariesCannibalsUI();
             ui.setVisible(true);
         });
     }
